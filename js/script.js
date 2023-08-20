@@ -1,48 +1,49 @@
 const X = 'X',
     O = 'O',
     EMPTY = undefined,
+
     drawAudio = new Audio('mp3/draw.mp3'),
     victoryAudio = new Audio('mp3/win.mp3'),
-    loseAudio = new Audio('mp3/lose.mp3');
+    loseAudio = new Audio('mp3/lose.mp3'),
 
-const cells = document.querySelectorAll('.cell');
+    cells = document.querySelectorAll('.cell');
 
 let user,
     aiTurn = false,
     board = initialState(),
     isGameOver = terminal(board),
     ai;
+
 userChoosing();
 
 cells.forEach(cell => {
     cell.addEventListener('click', async () => {
-        if(!aiTurn && !cell.innerHTML && !isGameOver) {
+        if (!aiTurn && !cell.innerHTML && !isGameOver) {
             cell.innerHTML = user;
             let pos = convertTo2D(cell.id[1]);
             board = result(board, pos);
             aiTurn = true;
 
             isGameOver = terminal(board);
-            console.log(isGameOver)
-            
-            if(isGameOver) handlerWinningPlayer();
-        
+            // console.log(isGameOver)
+
+            if (isGameOver) handlerWinningPlayer();
             else await AIMoves();
         }
     })
-        
+
 })
 
 // handler winning player
 function handlerWinningPlayer() {
-    if(isGameOver) {
+    if (isGameOver) {
         let winningPlayer = winner(board);
-        if(typeof winningPlayer === 'undefined') {
+        if (typeof winningPlayer === 'undefined') {
             playSound(drawAudio);
             popUp(`That\'s a good try! 
             Cuz you can\'t defeat me bae!`);
         }
-        else if(winningPlayer === user) {
+        else if (winningPlayer === user) {
             console.log(winningPlayer, user)
             playSound(victoryAudio);
             popUp('You win! Congratulations!');
@@ -64,7 +65,7 @@ async function userChoosing() {
         confirmButtonText: 'Play as X'
     })
         .then(result => {
-            if(result.isConfirmed) {
+            if (result.isConfirmed) {
                 user = X;
                 ai = O;
             }
@@ -89,20 +90,20 @@ function popUp(title) {
     Swal.fire({
         showClass: {
             popup: 'animate__animated animate__fadeInDown'
-          },
-          hideClass: {
+        },
+        hideClass: {
             popup: 'animate__animated animate__fadeOutUp'
-          },
+        },
         title: title,
         width: 600,
         padding: '3em',
         color: 'black',
         showCancelButton: true,
         confirmButtonText: 'Continue'
-      })
-      .then(res => {
-        if(res.isConfirmed) location.reload();
-      }) 
+    })
+        .then(res => {
+            if (res.isConfirmed) location.reload();
+        })
 }
 
 async function AIMoves() {
@@ -114,17 +115,14 @@ async function AIMoves() {
 
     isGameOver = terminal(board);
 
-    if(isGameOver) {
-        handlerWinningPlayer();
-    }
-
+    if (isGameOver) handlerWinningPlayer();
     else aiTurn = false;
 }
 
 
 /// Function to convert 1D id to 2D id
 function convertTo2D(id) {
-    let pos = [0 , 0];
+    let pos = [0, 0];
     pos[0] = Math.floor(id / 3);
     pos[1] = id % 3;
 
@@ -138,8 +136,8 @@ function convertTo1D(pos) {
 /// LOGIC GAME
 function deepCopy(src) {
     let temp = initialState();
-    for(let i = 0; i < 3; i++) {
-        for(let j = 0; j < 3; j++) {
+    for (let i = 0; i < 3; i++) {
+        for (let j = 0; j < 3; j++) {
             temp[i][j] = src[i][j];
         }
     }
@@ -155,21 +153,21 @@ function initialState() {
 }
 
 function player(board) {
-    let checkEmpty = 0, 
+    let checkEmpty = 0,
         checkX = 0,
         checkO = 0;
-    
-    for(let i = 0; i < 3; i++) {
-        for(let j = 0; j < 3; j++) {
-            if(board[i][j] == EMPTY) checkEmpty++;
-            else if(board[i][j] == X) checkX++;
+
+    for (let i = 0; i < 3; i++) {
+        for (let j = 0; j < 3; j++) {
+            if (board[i][j] == EMPTY) checkEmpty++;
+            else if (board[i][j] == X) checkX++;
             else checkO++;
         }
     }
-    
-    if(checkEmpty == 9) return X;
+
+    if (checkEmpty == 9) return X;
     else {
-        if(checkX > checkO) return O;
+        if (checkX > checkO) return O;
         else return X;
     }
 }
@@ -177,9 +175,9 @@ function player(board) {
 function actions(board) {
     let actions = [];
 
-    for(let i = 0; i < 3; i++) {
-        for(let j = 0; j < 3; j++) {
-            if(board[i][j] == EMPTY) {
+    for (let i = 0; i < 3; i++) {
+        for (let j = 0; j < 3; j++) {
+            if (board[i][j] == EMPTY) {
                 actions.push([i, j]);
             }
         }
@@ -191,7 +189,7 @@ function actions(board) {
 function result(board, action) {
     let tempBoard = deepCopy(board);
 
-    if(tempBoard[action[0]][action[1]] == EMPTY) {
+    if (tempBoard[action[0]][action[1]] == EMPTY) {
         tempBoard[action[0]][action[1]] = player(tempBoard);
     }
 
@@ -199,21 +197,21 @@ function result(board, action) {
 }
 
 function winner(board) {
-    if ((board[0][0] == board[0][1] && board[0][1] == board[0][2] && board[0][2] == X) || 
-        (board[1][0] == board[1][1] && board[1][1] == board[1][2] && board[1][2] == X) || 
-        (board[2][0] == board[2][1] && board[2][1] == board[2][2] && board[2][2] == X) ||  
-        (board[0][0] == board[1][0] && board[1][0] == board[2][0] && board[2][0] == X) || 
+    if ((board[0][0] == board[0][1] && board[0][1] == board[0][2] && board[0][2] == X) ||
+        (board[1][0] == board[1][1] && board[1][1] == board[1][2] && board[1][2] == X) ||
+        (board[2][0] == board[2][1] && board[2][1] == board[2][2] && board[2][2] == X) ||
+        (board[0][0] == board[1][0] && board[1][0] == board[2][0] && board[2][0] == X) ||
         (board[0][1] == board[1][1] && board[1][1] == board[2][1] && board[2][1] == X) ||
-        (board[0][2] == board[1][2] && board[1][2] == board[2][2] && board[2][2] == X) || 
+        (board[0][2] == board[1][2] && board[1][2] == board[2][2] && board[2][2] == X) ||
         (board[0][0] == board[1][1] && board[1][1] == board[2][2] && board[2][2] == X) ||
         (board[0][2] == board[1][1] && board[1][1] == board[2][0] && board[2][0] == X))
         return X
-    else if ((board[0][0] == board[0][1] && board[0][1] == board[0][2] && board[0][2] == O) || 
-        (board[1][0] == board[1][1] && board[1][1] == board[1][2] && board[1][2] == O) || 
-        (board[2][0] == board[2][1] && board[2][1] == board[2][2] && board[2][2] == O) ||  
-        (board[0][0] == board[1][0] && board[1][0] == board[2][0] && board[2][0] == O) || 
-        (board[0][1] == board[1][1] && board[1][1] == board[2][1] && board[2][1] == O) || 
-        (board[0][2] == board[1][2] && board[1][2] == board[2][2] && board[2][2] == O) || 
+    else if ((board[0][0] == board[0][1] && board[0][1] == board[0][2] && board[0][2] == O) ||
+        (board[1][0] == board[1][1] && board[1][1] == board[1][2] && board[1][2] == O) ||
+        (board[2][0] == board[2][1] && board[2][1] == board[2][2] && board[2][2] == O) ||
+        (board[0][0] == board[1][0] && board[1][0] == board[2][0] && board[2][0] == O) ||
+        (board[0][1] == board[1][1] && board[1][1] == board[2][1] && board[2][1] == O) ||
+        (board[0][2] == board[1][2] && board[1][2] == board[2][2] && board[2][2] == O) ||
         (board[0][0] == board[1][1] && board[1][1] == board[2][2] && board[2][2] == O) ||
         (board[0][2] == board[1][1] && board[1][1] == board[2][0] && board[2][0] == O))
         return O
@@ -222,11 +220,11 @@ function winner(board) {
 }
 
 function terminal(board) {
-    if(typeof winner(board) != 'undefined') return true;
+    if (typeof winner(board) != 'undefined') return true;
 
-    for(let i = 0; i < 3; i++) {
-        for(let j = 0; j < 3; j++) {
-            if(board[i][j] == EMPTY) return false;
+    for (let i = 0; i < 3; i++) {
+        for (let j = 0; j < 3; j++) {
+            if (board[i][j] == EMPTY) return false;
         }
     }
 
@@ -234,8 +232,8 @@ function terminal(board) {
 }
 
 function utility(board) {
-    if(winner(board) == X) return 1;
-    else if(winner(board) == O) return -1;
+    if (winner(board) == X) return 1;
+    else if (winner(board) == O) return -1;
     else return 0;
 }
 
@@ -243,12 +241,12 @@ function minimax(board) {
     let moves = actions(board);
     let action = [0, 0];
 
-    if(player(board) == X) {
+    if (player(board) == X) {
         let check = -Infinity;
-        for(let i = 0; i < moves.length; i++) {
+        for (let i = 0; i < moves.length; i++) {
             let value = mini(result(board, moves[i]));
 
-            if(value > check) {
+            if (value > check) {
                 check = value;
                 action = moves[i];
             }
@@ -257,10 +255,10 @@ function minimax(board) {
 
     else {
         let check = Infinity;
-        for(let i = 0; i < moves.length; i++) {
+        for (let i = 0; i < moves.length; i++) {
             let value = maxi(result(board, moves[i]));
 
-            if(value < check) {
+            if (value < check) {
                 check = value;
                 action = moves[i];
             }
@@ -275,7 +273,7 @@ function mini(board) {
     if (terminal(board)) return utility(board);
 
     let moves = actions(board);
-    for(let i = 0; i < moves.length; i++) {
+    for (let i = 0; i < moves.length; i++) {
         values.push(maxi(result(board, moves[i])))
     }
 
@@ -287,7 +285,7 @@ function maxi(board) {
     if (terminal(board)) return utility(board);
 
     let moves = actions(board);
-    for(let i = 0; i < moves.length; i++) {
+    for (let i = 0; i < moves.length; i++) {
         values.push(mini(result(board, moves[i])))
     }
 
