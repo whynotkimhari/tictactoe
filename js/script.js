@@ -2,9 +2,9 @@ const X = 'X',
     O = 'O',
     EMPTY = undefined,
 
-    drawAudio = new Audio('../mp3/draw.mp3'),
-    victoryAudio = new Audio('../mp3/win.mp3'),
-    loseAudio = new Audio('../mp3/lose.mp3'),
+    drawAudio = new Audio('mp3/draw.mp3'),
+    victoryAudio = new Audio('mp3/win.mp3'),
+    loseAudio = new Audio('mp3/lose.mp3'),
 
     cells = document.querySelectorAll('.cell');
 
@@ -68,7 +68,7 @@ async function userChoosing() {
     })
         .then(result => {
             if (result.isConfirmed) {
-                location.href = '../html/vsP.html'
+                location.href = 'html/vsP.html'
             }
         })
 
