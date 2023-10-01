@@ -8,30 +8,36 @@ const X = 'X',
 
     cells = document.querySelectorAll('.cell');
 
-let user,
-    aiTurn = false,
+let user1,
+    user2,
+    username1 = "Player 1",
+    username2 = "Player 2",
+    pts1 = 0,
+    pts2 = 0,
     board = initialState(),
     isGameOver = terminal(board),
-    ai,
+    turn = X,
+    notifier = document.querySelector('#notifier'),
+    pts = document.querySelector('#pts'),
+    lastWinner = undefined;
 
-    notifier = document.querySelector('#notifier');
-
+notifier.innerHTML = 'Welcome to Tic Tac Toe'
 userChoosing();
 
 cells.forEach(cell => {
     cell.addEventListener('click', async () => {
-        if (!aiTurn && !cell.innerHTML && !isGameOver) {
-            cell.innerHTML = user;
+        if (!cell.innerHTML && !isGameOver) {
+            cell.innerHTML = turn;
             let pos = convertTo2D(cell.id[1]);
             board = result(board, pos);
-            aiTurn = true;
 
-            isGameOver = terminal(board);
-            // console.log(isGameOver)
+            turn = turn === X ? O : X;
 
-            if (isGameOver) handlerWinningPlayer();
-            else await AIMoves();
+            notifier.innerHTML = turn === X ? `${username1} turn` : `${username2} turn`;
         }
+        
+        isGameOver = terminal(board);
+        if (isGameOver) handlerWinningPlayer();
     })
 
 })
@@ -40,59 +46,72 @@ cells.forEach(cell => {
 function handlerWinningPlayer() {
     if (isGameOver) {
         let winningPlayer = winner(board);
+        console.log(winningPlayer)
         if (typeof winningPlayer === 'undefined') {
+            turn = X;
+            notifier.innerHTML = turn === X ? `${username1} turn` : `${username2} turn`;
+            lastWinner = undefined;
+
+            pts1++; pts2++;
             playSound(drawAudio);
-            popUp(`That\'s a good try! 
-            Cuz you can\'t defeat me bae!`);
+            popUp(`That\'s a good match!`);
         }
-        else if (winningPlayer === user) {
-            console.log(winningPlayer, user)
+        else if (winningPlayer === user1) {
+            pts1++;
+            lastWinner = user1;
             playSound(victoryAudio);
-            popUp('You win! Congratulations!');
+            popUp(`${username1} win! Congratulations!`);
         }
         else {
-            playSound(loseAudio);
-            popUp('Keep trying, you can\'t defeat me!');
+            pts2++;
+            lastWinner = user2;
+            playSound(victoryAudio);
+            popUp(`${username2} win! Congratulations!`);
         }
     }
+    
 }
 
 // chose X or O
 async function userChoosing() {
     await Swal.fire({
         icon: 'question',
-        title: 'Choose your type of playing',
-        showCancelButton: true,
-        cancelButtonText: 'Play with AI',
-        confirmButtonText: 'Play with friend'
-    })
-        .then(result => {
-            if (result.isConfirmed) {
-                location.href = '../html/vsP.html'
-            }
-        })
-
-    notifier.innerHTML = 'Playing with AI...'
-
-    Swal.fire({
-        icon: 'question',
-        title: 'Choose X or O for your play',
+        title: 'Choose X or O for Player 1',
         showCancelButton: true,
         cancelButtonText: 'Play as O',
         confirmButtonText: 'Play as X'
     })
         .then(result => {
             if (result.isConfirmed) {
-                user = X;
-                ai = O;
+                user1 = X;
+                user2 = O;
             }
             else {
-                user = O;
-                ai = X;
-                aiTurn = true;
-                AIMoves();
+                user1 = O;
+                user2 = X;
             }
         })
+
+    await Swal.fire({
+        icon: 'question',
+        title: 'Player 1 wanna be called as...',
+        input: 'text'
+    })
+        .then(res => {
+            username1 = res.value.trim() === "" ? username1 : res.value.trim();
+        })
+
+    await Swal.fire({
+        icon: 'question',
+        title: 'Player 2 wanna be called as...',
+        input: 'text'
+    })
+        .then(res => {
+            username2 = res.value.trim() === "" ? username2 : res.value.trim();
+        })
+
+    notifier.innerHTML = turn === X ? `${username1} turn` : `${username2} turn`;
+    pts.innerHTML = `${username1}: ${pts1} - ${username2}: ${pts2}`;
 }
 
 // playsound
@@ -119,21 +138,18 @@ function popUp(title) {
         confirmButtonText: 'Continue'
     })
         .then(res => {
-            if (res.isConfirmed) location.reload();
+            if (res.isConfirmed) {
+                cells.forEach(cell => {
+                    cell.innerHTML = '';
+                })
+                console.log(user1, user2, turn)
+                board = initialState();
+                isGameOver = terminal(board);
+
+                pts.innerHTML = `${username1}: ${pts1} - ${username2}: ${pts2}`;
+
+            }
         })
-}
-
-async function AIMoves() {
-    var move = minimax(board)
-    board = result(board, move)
-
-    let id = convertTo1D(move);
-    document.querySelector(`#c${id}`).innerHTML = ai;
-
-    isGameOver = terminal(board);
-
-    if (isGameOver) handlerWinningPlayer();
-    else aiTurn = false;
 }
 
 
@@ -182,10 +198,21 @@ function player(board) {
         }
     }
 
-    if (checkEmpty == 9) return X;
+    if (checkEmpty == 9) {
+        if(!lastWinner) return X;
+        else if(lastWinner == user1) return user2;
+        else return user1;
+    }
     else {
-        if (checkX > checkO) return O;
-        else return X;
+        if(!lastWinner || lastWinner == O) {
+            if (checkX > checkO) return O;
+            else return X;  
+        }
+        else {
+            if (checkX >= checkO) return O;
+            else return X;
+        }
+        
     }
 }
 
@@ -214,6 +241,7 @@ function result(board, action) {
 }
 
 function winner(board) {
+    console.log(board)
     if ((board[0][0] == board[0][1] && board[0][1] == board[0][2] && board[0][2] == X) ||
         (board[1][0] == board[1][1] && board[1][1] == board[1][2] && board[1][2] == X) ||
         (board[2][0] == board[2][1] && board[2][1] == board[2][2] && board[2][2] == X) ||
@@ -246,65 +274,4 @@ function terminal(board) {
     }
 
     return true;
-}
-
-function utility(board) {
-    if (winner(board) == X) return 1;
-    else if (winner(board) == O) return -1;
-    else return 0;
-}
-
-function minimax(board) {
-    let moves = actions(board);
-    let action = [0, 0];
-
-    if (player(board) == X) {
-        let check = -Infinity;
-        for (let i = 0; i < moves.length; i++) {
-            let value = mini(result(board, moves[i]));
-
-            if (value > check) {
-                check = value;
-                action = moves[i];
-            }
-        }
-    }
-
-    else {
-        let check = Infinity;
-        for (let i = 0; i < moves.length; i++) {
-            let value = maxi(result(board, moves[i]));
-
-            if (value < check) {
-                check = value;
-                action = moves[i];
-            }
-        }
-    }
-
-    return action;
-}
-
-function mini(board) {
-    let values = [];
-    if (terminal(board)) return utility(board);
-
-    let moves = actions(board);
-    for (let i = 0; i < moves.length; i++) {
-        values.push(maxi(result(board, moves[i])))
-    }
-
-    return Math.min(...values);
-}
-
-function maxi(board) {
-    let values = [];
-    if (terminal(board)) return utility(board);
-
-    let moves = actions(board);
-    for (let i = 0; i < moves.length; i++) {
-        values.push(mini(result(board, moves[i])))
-    }
-
-    return Math.max(...values);
 }
