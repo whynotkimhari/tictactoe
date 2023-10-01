@@ -11,3 +11,5 @@ TIC TAC TOE with your friends, or with AI (you can not defeat it !!!)
 - Features:
   + Use your name
   + Point counter
+
+![img](https://github.com/whynotkimhari/tictactoe/blob/main/img/preview_github.png)
