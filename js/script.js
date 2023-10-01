@@ -68,7 +68,7 @@ async function userChoosing() {
     })
         .then(result => {
             if (result.isConfirmed) {
-                location.href = './html/vsP.html'
+                location.href = 'tictactoe/html/vsP.html'
             }
         })
 
