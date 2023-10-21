@@ -19,7 +19,8 @@ let user1,
     turn = X,
     notifier = document.querySelector('#notifier'),
     pts = document.querySelector('#pts'),
-    lastWinner = undefined;
+    lastWinner = undefined,
+    NotifyWinner = false;
 
 notifier.innerHTML = 'Welcome to Tic Tac Toe'
 userChoosing();
@@ -37,13 +38,37 @@ cells.forEach(cell => {
         }
         
         isGameOver = terminal(board);
-        if (isGameOver) handlerWinningPlayer();
+        if (isGameOver && !NotifyWinner) await handlerWinningPlayer();
+
+        
+        console.log("NotifyWinner: " + NotifyWinner)
+
+        if(isGameOver && NotifyWinner) {
+            await Swal.fire({
+                title: "This game is finnish!",
+                showCancelButton: true,
+                confirmButtonText: "Play Again",
+                cancelButtonText: "Quit",
+            })
+                .then(rs => {
+                    if(rs.isConfirmed) {
+                        cells.forEach(cell => cell.innerHTML = '')
+                        console.log(user1, user2, turn)
+                        board = initialState();
+                        isGameOver = terminal(board);
+        
+                        pts.innerHTML = `${username1}: ${pts1} - ${username2}: ${pts2}`;
+                        NotifyWinner = false;
+                    }
+                    else window.close()
+                })
+        }
     })
 
 })
 
 // handler winning player
-function handlerWinningPlayer() {
+async function handlerWinningPlayer() {
     if (isGameOver) {
         let winningPlayer = winner(board);
         console.log(winningPlayer)
@@ -54,19 +79,22 @@ function handlerWinningPlayer() {
 
             pts1++; pts2++;
             playSound(drawAudio);
-            popUp(`That\'s a good match!`);
+
+            await popUp(`That\'s a good match!`);
         }
         else if (winningPlayer === user1) {
             pts1++;
             lastWinner = user1;
             playSound(victoryAudio);
-            popUp(`${username1} win! Congratulations!`);
+
+            await popUp(`${username1} win! Congratulations!`);
         }
         else {
             pts2++;
             lastWinner = user2;
             playSound(victoryAudio);
-            popUp(`${username2} win! Congratulations!`);
+
+            await popUp(`${username2} win! Congratulations!`);
         }
     }
     
@@ -122,7 +150,7 @@ function playSound(mp3) {
 }
 
 // pop-up
-function popUp(title) {
+async function popUp(title) {
     Swal.fire({
         showClass: {
             popup: 'animate__animated animate__fadeInDown'
@@ -138,10 +166,10 @@ function popUp(title) {
         confirmButtonText: 'Continue'
     })
         .then(res => {
+            NotifyWinner = true;
             if (res.isConfirmed) {
-                cells.forEach(cell => {
-                    cell.innerHTML = '';
-                })
+
+                cells.forEach(cell => cell.innerHTML = '')
                 console.log(user1, user2, turn)
                 board = initialState();
                 isGameOver = terminal(board);
@@ -149,6 +177,7 @@ function popUp(title) {
                 pts.innerHTML = `${username1}: ${pts1} - ${username2}: ${pts2}`;
 
             }
+            
         })
 }
 
@@ -251,7 +280,8 @@ function winner(board) {
         (board[0][0] == board[1][1] && board[1][1] == board[2][2] && board[2][2] == X) ||
         (board[0][2] == board[1][1] && board[1][1] == board[2][0] && board[2][0] == X))
         return X
-    else if ((board[0][0] == board[0][1] && board[0][1] == board[0][2] && board[0][2] == O) ||
+    else if 
+        ((board[0][0] == board[0][1] && board[0][1] == board[0][2] && board[0][2] == O) ||
         (board[1][0] == board[1][1] && board[1][1] == board[1][2] && board[1][2] == O) ||
         (board[2][0] == board[2][1] && board[2][1] == board[2][2] && board[2][2] == O) ||
         (board[0][0] == board[1][0] && board[1][0] == board[2][0] && board[2][0] == O) ||
