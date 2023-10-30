@@ -14,4 +14,6 @@ TIC TAC TOE with your friends, or with AI (you can not defeat it !!!)
   + Point counter
   + ...
 
+- Co-authors: phamtruc-work, wnkh
+
 ![img](https://github.com/whynotkimhari/tictactoe/blob/main/img/preview_github.png)
